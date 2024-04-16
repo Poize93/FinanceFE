@@ -143,10 +143,14 @@ export default function Registration() {
   // }
 
   //
+  const isLive = true;
+  const hostName = !!isLive
+    ? "https://financebe.onrender.com"
+    : "http://localhost:5678";
 
   const handleLogInFuction = async () => {
     try {
-      const response = await fetch("http://localhost:5678/login", {
+      const response = await fetch(`${hostName}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -171,7 +175,7 @@ export default function Registration() {
 
   const handleRegisterFunction = async () => {
     try {
-      const response = await fetch("http://localhost:5678/register", {
+      const response = await fetch(`${hostName}/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

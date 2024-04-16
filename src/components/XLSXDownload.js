@@ -2,6 +2,7 @@ import React from "react";
 import { Button } from "@mui/material";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import DownloadIcon from "@mui/icons-material/Download";
 
 export default function XLSXDownload({ expenseList, totalExpense }) {
   const tempArray = [];
@@ -66,7 +67,9 @@ export default function XLSXDownload({ expenseList, totalExpense }) {
 
   return (
     <>
-      <Button onClick={handleDownload}>Download Excel</Button>
+      {" "}
+      <DownloadIcon onClick={handleDownload} style={{ cursor: "pointer" }} />
+      {/* <Button onClick={handleDownload}>Download Excel</Button> */}
     </>
   );
 }

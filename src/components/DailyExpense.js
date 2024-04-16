@@ -30,13 +30,21 @@ export default function DailyExpense() {
     isFuel: 1,
     date: new Date("MM/DD/YYYY"),
   });
+
+  const userName = window.sessionStorage.getItem("userName");
+
   const { amount, reason, isFuel, date } = expenseDetails;
+  const isLive = true;
+  const hostName = !!isLive
+    ? "https://financebe.onrender.com"
+    : "http://localhost:5678";
+
   const handleAddFunction = async () => {
     if (!!amount && !!reason && !!date) {
-      const response = await fetch("http://localhost:5678/addExpense", {
+      const response = await fetch(`${hostName}/addExpense`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(expenseDetails),
+        body: JSON.stringify({ ...expenseDetails, userName }),
       });
       await handleFetchExpenes();
 
@@ -56,9 +64,12 @@ export default function DailyExpense() {
   }, []);
 
   const handleFetchExpenes = async () => {
-    const response = await fetch("http://localhost:5678/getAllExpenses", {
-      method: "GET",
-    });
+    const response = await fetch(
+      `${hostName}/getAllExpenses?userName=${userName}`,
+      {
+        method: "GET",
+      }
+    );
 
     response.json().then((res) => setExpenseList(res));
   };
@@ -80,9 +91,9 @@ export default function DailyExpense() {
       "Dec",
     ];
 
-    return `${localDate?.getDate()}${
+    return `${localDate?.getDate()}-${
       month[localDate?.getMonth()]
-    }${localDate?.getFullYear()}`;
+    }-${localDate?.getFullYear()}`;
   };
   const [searchDetails, setSearchDetails] = useState({ isFuel: 2, Date: "" });
   const filterData = expenseList?.filter((item) =>
@@ -100,10 +111,12 @@ export default function DailyExpense() {
   //   dayjs("2022-04-21"),
   // ]);
 
+  console.log(filterData, "filterDatafilterData");
+
   return (
     <>
       {/* <DateRangePicker /> */}
-      <XLSXDownload expenseList={filterData} totalExpense={totalExpense} />
+
       <Typography>Daily Expense Tracker</Typography>
       <Box sx={{ display: "flex" }}>
         <Box
@@ -169,6 +182,18 @@ export default function DailyExpense() {
           </Button>
         </Box>
         <Box sx={{ width: "60%" }}>
+          <Box
+            style={{
+              display: "flex",
+              justifyContent: "end",
+            }}
+          >
+            <XLSXDownload
+              expenseList={filterData}
+              totalExpense={totalExpense}
+            />
+          </Box>
+
           <TableContainer
             component={Paper}
             style={{ maxHeight: "80vh", overflowY: "auto" }}
@@ -179,34 +204,7 @@ export default function DailyExpense() {
                   <TableCell>Sr. No</TableCell>
                   <TableCell style={{ maxWidth: "40px" }}>Reason</TableCell>
                   <TableCell align="right">Amount</TableCell>
-                  <TableCell align="right">
-                    {" "}
-                    Date
-                    {/* <FormControl>
-                      <InputLabel id="demo-simple-select-label">
-                        Date
-                      </InputLabel>
-                      <Select
-                        labelId="demo-simple-select-label"
-                        id="demo-simple-select"
-                        // value={searchDetails?.isFuel}
-                        label="Date"
-                        // onChange={(e) =>
-                        //   setSearchDetails({
-                        //     ...searchDetails,
-                        //     isFuel: e.target.value,
-                        //   })
-                        // }
-                      >
-                        <MenuItem value={1}>
-                          <DateRangePicker
-                            dateRange={dateRange}
-                            setDateRange={setDateRange}
-                          />
-                        </MenuItem>
-                      </Select>
-                    </FormControl> */}
-                  </TableCell>
+                  <TableCell align="right"> Date</TableCell>
                   <TableCell align="right">
                     <FormControl>
                       <InputLabel id="demo-simple-select-label">
@@ -233,26 +231,38 @@ export default function DailyExpense() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filterData.map((row, index) => (
-                  <TableRow
-                    key={row.name}
-                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                  >
-                    <TableCell>{index + 1}</TableCell>
-                    <TableCell
-                      style={{ maxWidth: "40px", textWrap: "wrap" }}
-                      component="th"
-                      scope="row"
-                    >
-                      {row?.reason}
-                    </TableCell>
-                    <TableCell align="right">{row?.amount}</TableCell>
-                    <TableCell align="right">{dateFormat(row?.date)}</TableCell>
-                    <TableCell align="right">
-                      {row?.isFuel === 1 ? "Yes" : "No"}
+                {filterData?.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} style={{ textAlign: "center" }}>
+                      No Data Available
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : (
+                  filterData.map((row, index) => (
+                    <TableRow
+                      key={row.name}
+                      sx={{
+                        "&:last-child td, &:last-child th": { border: 0 },
+                      }}
+                    >
+                      <TableCell>{index + 1}</TableCell>
+                      <TableCell
+                        style={{ maxWidth: "40px", textWrap: "wrap" }}
+                        component="th"
+                        scope="row"
+                      >
+                        {row?.reason}
+                      </TableCell>
+                      <TableCell align="right">{row?.amount}</TableCell>
+                      <TableCell align="right">
+                        {dateFormat(row?.date)}
+                      </TableCell>
+                      <TableCell align="right">
+                        {row?.isFuel === 1 ? "Yes" : "No"}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
                 <TableRow>
                   <TableCell align="right"></TableCell>
                   <TableCell align="right">Total</TableCell>
